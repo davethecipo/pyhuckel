@@ -27,7 +27,7 @@ class HuckelOverlap(object):
         Hp = np.dot(overlap_inverse12.T.conj(), right)
         En = eigvals(Hp)
         self._check_energy_imaginary_component(En, energy_tolerance)
-        return [En.real]
+        return [np.sort(En.real)]
 
     @staticmethod
     def _check_energy_imaginary_component(energy_array, tolerance=10e-10):
@@ -81,7 +81,7 @@ class Huckel(HuckelOverlap):
         hamiltonian = self._hamiltonian(theta1, theta2)
         En = eigvalsh(hamiltonian)
         self._check_energy_imaginary_component(En, energy_tolerance)
-        return [En.real]
+        return [np.sort(En.real)]
 
 
 class Path(object):

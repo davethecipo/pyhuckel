@@ -7,7 +7,7 @@ setup(name='pyhuckel',
       description='Calculate energy bands for 2D sp2 materials with the Huckel approach',
       author='Davide Olianas',
       author_email='ubuntupk@gmail.com',
-      py_modules=['huckel'],
+      packages=['pyhuckel'],
       install_requires=['numpy', 'scipy'],
       tests_require=['pycodestyle']
      )

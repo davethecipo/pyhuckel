@@ -1,6 +1,15 @@
 import numpy as np
 from numpy.linalg import eigvalsh, norm
-from scipy.linalg import eigvals, fractional_matrix_power
+from scipy.linalg import fractional_matrix_power
+
+
+class EnergyError(Exception):
+    def __init__(self, energy_eigenvalues, msg=None):
+        if msg is None:
+            msg = "Error with the Hamiltonian eigenvalues: complex values are" \
+                  "present. Array of energy values: {}".format(energy_eigenvalues)
+        super(EnergyError, self).__init__(msg)
+        self.energy_eigenvalues = energy_eigenvalues
 
 
 class Huckel(object):
@@ -22,19 +31,18 @@ class Huckel(object):
 
     @staticmethod
     def _check_energy_imaginary_component(energy_array, tolerance=10e-10):
-        """Raise Exception if the norm of the imaginary part of energy_array
+        """Raise EnergyError if the norm of the imaginary part of energy_array
         is greater than tolerance"""
         residue = norm(energy_array.imag)
         if residue > tolerance:
-            raise Exception('The energy eigenvalues have an imaginary part that\
-            is too big. Aborting.')
+            raise EnergyError(energy_array)
 
     def _hamiltonian(self, theta1, theta2):
-        return self.cyclic(self.a, self.b1, self.b2, theta1, theta2)
+        return self.circulant(self.a, self.b1, self.b2, theta1, theta2)
 
     @staticmethod
-    def cyclic(matrix, matrix1, matrix2, theta1, theta2):
-        """Return a cyclic matrix that satisfies the Born Von Karman
+    def circulant(matrix, matrix1, matrix2, theta1, theta2):
+        """Return a circulant matrix that satisfies the Born Von Karman
         boundary conditions.
 
         Args:
@@ -65,16 +73,16 @@ class HuckelOverlap(Huckel):
     def energy_eigenvalues(self, theta1, theta2, energy_tolerance=10e-10):
         """Calculate  energy eigenvalues for given phase factors theta1 and theta2.
 
-        Raise an Exception if the norm of the imaginary vector of eigenvalues
+        Raise EnergyError if the norm of the imaginary vector of eigenvalues
         is bigger that energy_tolerance."""
         hamiltonian = self._hamiltonian(theta1, theta2)
         overlap = self._overlap(theta1, theta2)
         overlap_inverse12 = fractional_matrix_power(overlap, -0.5)
         right = np.dot(hamiltonian, overlap_inverse12)
         Hp = np.dot(overlap_inverse12.T.conj(), right)
-        En = eigvals(Hp)
+        En = eigvalsh(Hp)
         self._check_energy_imaginary_component(En, energy_tolerance)
         return [np.sort(En.real)]
 
     def _overlap(self, theta1, theta2):
-        return self.cyclic(self.s0, self.s1, self.s2, theta1, theta2)
+        return self.circulant(self.s0, self.s1, self.s2, theta1, theta2)

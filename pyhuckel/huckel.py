@@ -22,7 +22,7 @@ class Huckel(object):
     def energy_eigenvalues(self, theta1, theta2, energy_tolerance=10e-10):
         """Calculate  energy eigenvalues for given phase factors theta1 and theta2.
 
-        Raise an Exception if the norm of the imaginary vector of eigenvalues
+        Raise EnergyError if the norm of the imaginary vector of eigenvalues
         is bigger that energy_tolerance."""
         hamiltonian = self._hamiltonian(theta1, theta2)
         En = eigvalsh(hamiltonian)
